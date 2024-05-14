@@ -2,7 +2,7 @@
 
 Welcome to the Target Trial Workshop at UCalgary! This workshop is designed to introduce you to the target trial framework for causal inference from both the theoretical and practical perspectives. We will be using the `R` programming language to simulate and analyze data.
 
-⭐ **Acknowledgements**: Most material from this workshop is based on the [Target Trial Short course](https://github.com/bldestavola/TTE-Short-Course) by Dr. Michalis Katsoulis.
+⭐ **Acknowledgements**: Material from this workshop is based on the [Target Trial Short course](https://github.com/bldestavola/TTE-Short-Course) by Dr. Michalis Katsoulis.
 
 #### Downloading RStudio
 
