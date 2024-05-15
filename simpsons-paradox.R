@@ -31,9 +31,31 @@ combined_regression_line <- lm(y ~ trt, data = data)
 combined_slope <- coef(combined_regression_line)[["trt"]]
 combined_intercept <- coef(combined_regression_line)[["(Intercept)"]]
 
-# Plot data
-ggplot(data, aes(x = trt, y = y, color = Group)) +
+p1 <- ggplot(data, aes(x = trt, y = y, color = Group)) +
+  geom_point() +
+  labs(title = "Illustration of Simpson's Paradox", trt = "Treatment", y = "Outcome")
+
+ggsave("figures/simpsons-paradox-1.png", p, width = 6, height = 4)
+
+# Only marginal line
+
+p2 <- ggplot(data, aes(x = trt, y = y, color = Group)) +
+  geom_point() +
+  geom_abline(intercept = combined_intercept, slope = combined_slope, color = "black", linetype = "dashed", linewidth = 0.5) +
+  labs(title = "Illustration of Simpson's Paradox", trt = "Treatment", y = "Outcome")
+
+p2
+
+ggsave("figures/simpsons-paradox-2.png", p, width = 6, height = 4)
+
+# With everything
+
+p3 <- ggplot(data, aes(x = trt, y = y, color = Group)) +
   geom_point() +
   geom_abline(data = regression_lines, aes(slope = slope, intercept = intercept), color = c("#f9766e", "#00bfc4"), linewidth = 0.5) +
   geom_abline(intercept = combined_intercept, slope = combined_slope, color = "black", linetype = "dashed", linewidth = 0.5) +
   labs(title = "Illustration of Simpson's Paradox", trt = "Treatment", y = "Outcome")
+
+p3
+
+ggsave("figures/simpsons-paradox-3.png", p, width = 6, height = 4)

@@ -12,4 +12,9 @@ Please have R and RStudio installed on your computer before the workshop. You ca
 
 You can clone this repository via RStudio by following these steps:
 
+![Step 1](figures/git-clone-1.png)
+![Step 2](figures/git-clone-2.png)
+![Step 3](figures/git-clone-3.png)
+![Step 4](figures/git-clone-4.png)
+
 If you would like to learn more about version control, Git and GitHub, you can learn more from my [presentation](https://docs.google.com/presentation/d/1bRzyNSGUGTeDwYJ-wLkjOH3SkMZtR5BzYA1b48rjBMI/edit?usp=sharing), or just ask me.
