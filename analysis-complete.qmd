@@ -1,0 +1,101 @@
+---
+title: "target-trial-practical"
+format: revealjs
+editor: visual
+---
+
+## 0. Pre-requisites
+
+The data is available in the `designmatch` package.
+
+```{r}
+if (!requireNamespace("tidyverse")) {
+  install.packages("tidyverse")
+}
+
+if (!requireNamespace("ggplot2")) {
+  install.packages("ggplot2")
+}
+
+# data available here
+if (!requireNamespace("designmatch")) {
+  install.packages("designmatch")
+}
+
+library(tidyverse)
+library(ggplot2)
+library(designmatch)
+```
+
+## 1. Loading and visualizing the data
+
+```{r}
+data(lalonde) # load the data
+attach(lalonde)
+
+head(data)
+```
+
+```{r}
+table(lalonde$treatment)
+```
+
+```{r}
+long_data <- lalonde %>%
+  pivot_longer(cols = c(re74, re75, re78), names_to = "variable", values_to = "value")
+
+# Boxplots
+ggplot(long_data, aes(x = variable, y = value, fill = variable)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("red", "green", "blue")) +
+  labs(title = "Boxplots of 1974, 1975 and 1978 earnings",
+       x = "Variable",
+       y = "Value") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+```{r}
+# Kernel density estimates
+density_re74 <- density(lalonde$re74)
+density_re75 <- density(lalonde$re75)
+density_re78 <- density(lalonde$re78)
+
+plot(density_re74, main = "Kernel Density of 1974, 1975 and 1978 earnings", 
+     xlab = "Earnings", ylab = "Density", xlim = range(c(density_re74$x, density_re75$x, density_re78$x)), 
+     ylim = range(c(density_re74$y, density_re75$y, density_re78$y)), col = "red", lwd = 2)
+
+lines(density_re75, col = "green", lwd = 2)
+lines(density_re78, col = "blue", lwd = 2)
+
+legend("topright", legend = c("re74", "re75", "re78"), col = c("red", "green", "blue"), lwd = 2)
+```
+
+## 3. Analysis
+
+#### 3.1 Inverse Weighting
+
+```{r}
+trt_model <- glm(treatment ~ education + black + hispanic + married + nodegree, data = lalonde, family = binomial)
+
+# Get propensity scores
+prob_trt <- predict(trt_model, type = "response")
+
+# Calculate weights
+iptw <- 1/ifelse(lalonde$treatment == 1, prob_trt, (1 - prob_trt))
+
+# Calculate the average treatment effect
+ate <- sum((iptw * re78)[treatment == 1]) / sum(iptw[treatment == 1]) - sum((iptw * re78)[treatment == 0]) / sum(iptw[treatment == 0])
+
+ate
+```
+
+#### 3.2 Outcome Regression via G-Computation
+
+```{r}
+out_model <- lm(re78 ~ treatment + age + education + black + hispanic + married + nodegree + re74 + re75, data = lalonde)
+
+coef(out_model)["treatment"]
+```
+
+#### 3.3 95% Confidence Intervals
