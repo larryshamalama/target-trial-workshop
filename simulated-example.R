@@ -22,6 +22,19 @@ iptw <- 1/ifelse(A, prob_trt, 1 - prob_trt)
 
 sum((Y*iptw)[A == 1])/sum(iptw[A == 1]) - sum((Y*iptw)[A == 0])/sum(iptw[A == 0])
 
+# IPTW analysis using `WeightIt` package
+
+# Install and load the `WeightIt` package
+if (!require(WeightIt)) {
+  install.packages("WeightIt")
+  library(WeightIt)
+}
+
+trt_model_wi <- weightit(A ~ X, data = data, method = "ps", family = "binomial")
+iptw_wi <- trt_model_wi$weights
+
+all.equal(iptw_wi, iptw, tolerance = 1e-8) # returns TRUE
+
 # Outcome modelling
 out_model <- lm(Y ~ A + sqrt(abs(X)) + X)
 coef(out_model)["A"] # coefficient in front of "A" is the estimated ATE
