@@ -20,7 +20,7 @@ trt_model <- glm(A ~ X, family = binomial())
 prob_trt <- predict(trt_model, type = "response")
 iptw <- 1/ifelse(A, prob_trt, 1 - prob_trt)
 
-sum((Y*iptw)[A == 1])/sum(iptw[A == 1]) - sum((Y*iptw)[A == 0])/sum(iptw[A == 0])
+ate_manual <- sum((Y*iptw)[A == 1])/sum(iptw[A == 1]) - sum((Y*iptw)[A == 0])/sum(iptw[A == 0])
 
 # IPTW analysis using `WeightIt` package
 
@@ -32,6 +32,12 @@ if (!require(WeightIt)) {
 
 trt_model_wi <- weightit(A ~ X, data = data, method = "ps", family = "binomial")
 iptw_wi <- trt_model_wi$weights
+
+ate_weightit <- with(
+  data,
+  sum(weight.out$weights[A == 1] * Y[A == 1])/sum(weight.out$weights[A == 1]) -
+  sum(weight.out$weights[A == 0] * Y[A == 0])/sum(weight.out$weights[A == 0])
+)
 
 all.equal(iptw_wi, iptw, tolerance = 1e-8) # returns TRUE
 

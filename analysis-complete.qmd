@@ -18,13 +18,13 @@ if (!requireNamespace("ggplot2")) {
 }
 
 # data available here
-if (!requireNamespace("designmatch")) {
-  install.packages("designmatch")
+if (!requireNamespace("MatchIt")) {
+  install.packages("MatchIt")
 }
 
 library(tidyverse)
 library(ggplot2)
-library(designmatch)
+library(MatchIt)
 ```
 
 ## 1. Loading and visualizing the data
@@ -33,11 +33,11 @@ library(designmatch)
 data(lalonde) # load the data
 attach(lalonde)
 
-head(data)
+head(lalonde)
 ```
 
 ```{r}
-table(lalonde$treatment)
+table(treat)
 ```
 
 ```{r}
@@ -71,31 +71,63 @@ lines(density_re78, col = "blue", lwd = 2)
 legend("topright", legend = c("re74", "re75", "re78"), col = c("red", "green", "blue"), lwd = 2)
 ```
 
-## 3. Analysis
+## 2. Analysis
 
-#### 3.1 Inverse Weighting
+#### 2.1 Inverse Weighting
 
 ```{r}
-trt_model <- glm(treatment ~ education + black + hispanic + married + nodegree, data = lalonde, family = binomial)
+trt_model <- glm(treat ~ educ + race + married + nodegree, data = lalonde, family = binomial())
 
 # Get propensity scores
 prob_trt <- predict(trt_model, type = "response")
 
 # Calculate weights
-iptw <- 1/ifelse(lalonde$treatment == 1, prob_trt, (1 - prob_trt))
+iptw <- ifelse(treat == 1, 1/prob_trt, 1/(1 - prob_trt))
 
 # Calculate the average treatment effect
-ate <- sum((iptw * re78)[treatment == 1]) / sum(iptw[treatment == 1]) - sum((iptw * re78)[treatment == 0]) / sum(iptw[treatment == 0])
+ate <- sum((iptw * re78)[treat == 1]) / sum(iptw[treat == 1]) - sum((iptw * re78)[treat == 0]) / sum(iptw[treat == 0])
 
 ate
 ```
 
-#### 3.2 Outcome Regression via G-Computation
+#### 2.2 Outcome Regression via G-Computation
 
 ```{r}
-out_model <- lm(re78 ~ treatment + age + education + black + hispanic + married + nodegree + re74 + re75, data = lalonde)
+out_model <- lm(re78 ~ treat + age + educ + married + nodegree, data = lalonde)
 
-coef(out_model)["treatment"]
+coef(out_model)["treat"]
 ```
 
-#### 3.3 95% Confidence Intervals
+#### 2.3 95% Confidence Intervals
+
+While the variance formula of the IPTW-estimated is not available as a closed-form solution, we can use bootstrap via the `boot` package to estimate the standard deviation and 95% confidence interval of the estimated ATE.
+
+```{r}
+if (!require(boot)) {
+  install.packages("boot")
+  library(boot)
+}
+
+compute_ate <- function(data, indices) {
+  bs_data <- data[indices,]
+  bs_trt_model <- glm(treat ~ educ + race + married + nodegree, data = bs_data, family = binomial())
+  
+  bs_prob_trt <- predict(bs_trt_model, type = "response")
+  bs_iptw <- ifelse(bs_data$treat == 1, 1/bs_prob_trt, 1/(1 - bs_prob_trt))
+  
+  bs_ate <- with(bs_data, sum((bs_iptw * re78)[treat == 1]) / sum(bs_iptw[treat == 1]) - sum((bs_iptw * re78)[treat == 0]) / sum(bs_iptw[treat == 0]))
+  
+  return(bs_ate)
+}
+
+# 1000 bootstrap replications
+bs_results <- boot(data = lalonde, statistic = compute_ate, R = 1000)
+
+boot.ci(bs_results, type = "perc")
+```
+
+If you used regression, you can simply look at the confidence interval from the summary table!
+
+```{r}
+confint(out_model)[2,]
+```
