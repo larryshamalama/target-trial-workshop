@@ -10,7 +10,7 @@ Y <- ATE * A + sqrt(abs(X)) + X + rnorm(n) # outcome
 
 data <- data.frame(Y = Y, A = A, X = X)
 
-save(data, file = "../data/simulated-data.RData")
+#save(data, file = "../data/simulated-data.RData")
 
 # Incorrect analysis
 
@@ -23,6 +23,7 @@ prob_trt <- predict(trt_model, type = "response")
 iptw <- 1/ifelse(A, prob_trt, 1 - prob_trt)
 
 ate_manual <- sum((Y*iptw)[A == 1])/sum(iptw[A == 1]) - sum((Y*iptw)[A == 0])/sum(iptw[A == 0])
+ate_manual # close to 2
 
 # IPTW analysis using `WeightIt` package
 
@@ -37,8 +38,8 @@ iptw_wi <- trt_model_wi$weights
 
 ate_weightit <- with(
   data,
-  sum(weight.out$weights[A == 1] * Y[A == 1])/sum(weight.out$weights[A == 1]) -
-  sum(weight.out$weights[A == 0] * Y[A == 0])/sum(weight.out$weights[A == 0])
+  sum(iptw_wi[A == 1] * Y[A == 1])/sum(iptw_wi[A == 1]) -
+  sum(iptw_wi[A == 0] * Y[A == 0])/sum(iptw_wi[A == 0])
 )
 
 all.equal(iptw_wi, iptw, tolerance = 1e-8) # returns TRUE

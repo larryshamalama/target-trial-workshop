@@ -9,20 +9,21 @@ if (!requireNamespace("ggplot2")) {
 }
 
 # data available here
-if (!requireNamespace("designmatch")) {
-  install.packages("designmatch")
+if (!requireNamespace("MatchIt")) {
+  install.packages("MatchIt")
 }
+
 
 library(tidyverse)
 library(ggplot2)
-library(designmatch)
+library(MatchIt)
 
 # Load the data
 
 data(lalonde) # load the data
 attach(lalonde)
 
-head(data)
+head(lalonde)
 
 # Exploratory data analysis
 
