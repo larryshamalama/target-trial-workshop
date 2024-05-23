@@ -10,6 +10,8 @@ Y <- ATE * A + sqrt(abs(X)) + X + rnorm(n) # outcome
 
 data <- data.frame(Y = Y, A = A, X = X)
 
+save(data, file = "../data/simulated-data.RData")
+
 # Incorrect analysis
 
 mean(Y[A == 1]) - mean(Y[A == 0]) # not equal to ATE defined above!

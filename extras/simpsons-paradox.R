@@ -7,7 +7,7 @@ set.seed(123)
 
 ATE <- -1
 
-continuous_treatment <- rnorm(200, mean = 3, sd = 2)
+X <- rnorm(200, mean = 3, sd = 2)
 prob_group <- 1 / (1 + exp(-(-6 + 2 * X)))
 group <- rbinom(n = 200, size = 1, prob = prob_group)
 Y <- 1 + 8 * group + ATE * X + rnorm(200, 0, 1)
@@ -35,7 +35,7 @@ p1 <- ggplot(data, aes(x = trt, y = y, color = Group)) +
   geom_point() +
   labs(title = "Illustration of Simpson's Paradox", trt = "Treatment", y = "Outcome")
 
-ggsave("figures/simpsons-paradox-1.png", p, width = 6, height = 4)
+ggsave("../figures/simpsons-paradox-1.png", p1, width = 6, height = 4)
 
 # Only marginal line
 
@@ -46,7 +46,7 @@ p2 <- ggplot(data, aes(x = trt, y = y, color = Group)) +
 
 p2
 
-ggsave("figures/simpsons-paradox-2.png", p, width = 6, height = 4)
+ggsave("../figures/simpsons-paradox-2.png", p2, width = 6, height = 4)
 
 # With everything
 
@@ -58,4 +58,4 @@ p3 <- ggplot(data, aes(x = trt, y = y, color = Group)) +
 
 p3
 
-ggsave("figures/simpsons-paradox-3.png", p, width = 6, height = 4)
+ggsave("../figures/simpsons-paradox-3.png", p3, width = 6, height = 4)
